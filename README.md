@@ -1,2 +1,2 @@
 # TLang
-A toy compiler written in typescript
+A toy interpreter written in typescript

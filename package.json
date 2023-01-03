@@ -1,0 +1,30 @@
+{
+  "name": "tlang",
+  "version": "1.0.0",
+  "description": "A toy compiler written in typescript",
+  "type": "module",
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "nodemon dist/index.js",
+    "watch": "tsc --watch",
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/saoodahmad/TLang.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/saoodahmad/TLang/issues"
+  },
+  "homepage": "https://github.com/saoodahmad/TLang#readme",
+  "dependencies": {
+    
+  },
+  "devDependencies": {
+    "typescript": "^4.9.4",
+    "@types/node": "^18.11.17",
+    "nodemon": "^2.0.20"
+  }
+}
