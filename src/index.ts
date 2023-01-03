@@ -1,1 +1,4 @@
-const a = 2
+import add from './add'
+
+add()
+console.log('hello world!')
