@@ -4,14 +4,15 @@
     "description": "A toy compiler written in typescript",
     "type": "module",
     "scripts": {
-        "start": "node dist/index.js",
-        "dev": "nodemon dist/index.js",
+        "start": "node --es-module-specifier-resolution=node dist/cli/cli.js",
+        "dev": "nodemon --es-module-specifier-resolution=node dist/index.js",
         "watch": "tsc --watch",
         "build": "tsc",
         "pretty": "prettier --write src",
         "lint:fix": "eslint src --fix",
         "test": "jest --detectOpenHandles",
-        "prepare": "husky install"
+        "prepare": "husky install",
+        "cli": "node --es-module-specifier-resolution=node dist/cli/cli.js"
     },
     "repository": {
         "type": "git",
@@ -24,12 +25,15 @@
     },
     "homepage": "https://github.com/saoodahmad/TLang#readme",
     "dependencies": {
+        "chalk": "^5.2.0",
         "husky": "^8.0.3",
-        "lint-staged": "^13.1.0"
+        "lint-staged": "^13.1.0",
+        "pkg": "^5.8.0",
+        "ts-node": "^10.9.1"
     },
     "devDependencies": {
         "@types/jest": "^29.2.5",
-        "@types/node": "^18.11.17",
+        "@types/node": "^18.11.18",
         "@typescript-eslint/eslint-plugin": "^5.48.0",
         "@typescript-eslint/parser": "^5.48.0",
         "eslint": "^8.31.0",

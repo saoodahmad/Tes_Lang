@@ -1,4 +1,5 @@
-import add from './add'
+const run = (sourceCode: string) => {
+    console.log(sourceCode)
+}
 
-add()
-console.log('hello world!')
+export default run
