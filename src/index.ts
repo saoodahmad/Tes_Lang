@@ -1,5 +1,5 @@
 const run = (sourceCode: string) => {
-    console.log(sourceCode)
+    console.log('Source code', sourceCode)
 }
 
 export default run
