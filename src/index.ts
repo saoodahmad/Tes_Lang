@@ -1,5 +1,3 @@
-const run = (sourceCode: string) => {
-    console.log('Source code', sourceCode)
-}
+import Tlang from './tlang/TLang'
 
-export default run
+Tlang.main()

@@ -1,7 +1,7 @@
-import TokenType from './TokenType.enum'
+import { TypeTokenKind } from './TokenType.enum'
 
 export default class Token {
-    readonly type: TokenType
+    readonly type: TypeTokenKind
 
     readonly lexeme: string
 
@@ -10,7 +10,7 @@ export default class Token {
     readonly line: number
 
     constructor(
-        type: TokenType,
+        type: TypeTokenKind,
         lexeme: string,
         literal: object,
         line: number
@@ -22,6 +22,6 @@ export default class Token {
     }
 
     toString(): string {
-        return `${this.type} ${this.lexeme} ${this.literal}`
+        return `Type: ${this.type},  Lexeme: '${this.lexeme}',  Literal: ${this.literal}`
     }
 }
