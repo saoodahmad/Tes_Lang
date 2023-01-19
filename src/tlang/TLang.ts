@@ -49,7 +49,6 @@ class TLang {
         const tokens: Array<Token> = lexer.lex()
 
         if (this.hadError) return
-
         tokens.forEach((token) => {
             console.log(token.toString())
         })
@@ -58,6 +57,7 @@ class TLang {
     static runFile(path: string) {
         try {
             const sourceCode = fs.readFileSync(path, 'utf8')
+
             this.run(sourceCode)
 
             if (this.hadError) {

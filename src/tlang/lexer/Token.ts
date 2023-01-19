@@ -5,14 +5,14 @@ export default class Token {
 
     readonly lexeme: string
 
-    readonly literal: object
+    readonly literal: unknown
 
     readonly line: number
 
     constructor(
         type: TypeTokenKind,
         lexeme: string,
-        literal: object,
+        literal: unknown,
         line: number
     ) {
         this.type = type
@@ -22,6 +22,6 @@ export default class Token {
     }
 
     toString(): string {
-        return `Type: ${this.type},  Lexeme: '${this.lexeme}',  Literal: ${this.literal}`
+        return `Type: ${this.type},  Lexeme: '${this.lexeme}',  Literal: '${this.literal}'`
     }
 }
