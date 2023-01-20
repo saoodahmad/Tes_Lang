@@ -16,7 +16,7 @@ class Lexer {
     static keywords: Map<string, TokenKind> = this.initializeKeywords()
 
     constructor(sourceCode: string) {
-        this.sourceCode = sourceCode.trim()
+        this.sourceCode = sourceCode.trimEnd()
     }
 
     lex(): Array<Token> {
@@ -112,9 +112,7 @@ class Lexer {
             case '/':
                 if (this.isAtEnd()) {
                     this.addToken(TokenKind.SLASH)
-                    break
-                }
-                if (this.match('/')) {
+                } else if (this.match('/')) {
                     this.lineComment()
                 } else if (this.match('*')) {
                     this.blockComment()
@@ -280,7 +278,7 @@ class Lexer {
         }
 
         if (this.isAtEnd()) {
-            TLang.reportError(this.line, 'Unterminated comments')
+            TLang.reportError(this.line, 'Unterminated comment')
             return
         }
 
