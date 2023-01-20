@@ -1,3 +1,7 @@
+<p align="center">
+  <img width="460" height="300" src="./LOGO.png">
+</p>
+
 # Tes Lang
 
 Tes is dynamically typed interpreted object oriented programming language written in typescript
