@@ -1,3 +1,3 @@
-# TLang
+# Tes Lang
 
-A toy interpreter written in typescript
+Tes is dynamically typed interpreted object oriented programming language written in typescript
