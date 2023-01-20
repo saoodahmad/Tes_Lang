@@ -53,12 +53,6 @@ class TLang {
         tokens.forEach((token) => {
             console.log(token.toString())
         })
-
-        // if (this.hadError) {
-        //     tokens.forEach((token) => {
-        //         console.log(token.toString())
-        //     })
-        // }
     }
 
     static runFile(path: string) {

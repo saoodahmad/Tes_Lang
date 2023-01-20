@@ -110,20 +110,18 @@ class Lexer {
                 }
                 break
             case '/':
-                if (!this.isAtEnd()) {
-                    if (this.match('/')) {
-                        while (this.peek() !== '\n' && !this.isAtEnd()) {
-                            this.advance()
-                        }
-                        break
-                    } else {
-                        this.addToken(TokenKind.SLASH)
-                        break
-                    }
-                } else {
+                if (this.isAtEnd()) {
                     this.addToken(TokenKind.SLASH)
                     break
                 }
+                if (this.match('/')) {
+                    this.lineComment()
+                } else if (this.match('*')) {
+                    this.blockComment()
+                } else {
+                    this.addToken(TokenKind.SLASH)
+                }
+                break
 
             case ' ':
             case '\t':
@@ -263,6 +261,33 @@ class Lexer {
             type = TokenKind.IDENTIFIER
         }
         this.addToken(type)
+    }
+
+    lineComment(): void {
+        while (this.peek() !== '\n' && !this.isAtEnd()) {
+            this.advance()
+        }
+    }
+
+    blockComment(): void {
+        while (!this.isAtEnd()) {
+            if (this.peek() === '\n') {
+                this.line++
+            } else if (this.peek() === '*' && this.peekNext() === '/') {
+                break
+            }
+            this.advance()
+        }
+
+        if (this.isAtEnd()) {
+            TLang.reportError(this.line, 'Unterminated comments')
+            return
+        }
+
+        if (this.peekNext() === '/') {
+            this.advance() // consume '*'
+            this.advance() // consume '/'
+        }
     }
 
     advance(): string {
