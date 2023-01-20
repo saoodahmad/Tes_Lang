@@ -13,6 +13,8 @@ class Lexer {
 
     line = 1
 
+    static keywords: Map<string, TokenKind> = this.initializeKeywords()
+
     constructor(sourceCode: string) {
         this.sourceCode = sourceCode.trim()
     }
@@ -137,9 +139,54 @@ class Lexer {
                 break
 
             default:
-                TLang.error(this.line, `Unexpected character '${c}'`)
+                if (this.isDigit(c)) {
+                    this.number()
+                } else if (this.isAlphabet(c)) {
+                    this.identifier()
+                } else {
+                    TLang.reportError(this.line, `Unexpected character '${c}'`)
+                }
                 break
         }
+    }
+
+    static initializeKeywords(): Map<string, TokenKind> {
+        const keywords = new Map<string, TokenKind>()
+
+        keywords.set('and', TokenKind.AND)
+        keywords.set('class', TokenKind.CLASS)
+        keywords.set('else', TokenKind.ELSE)
+        keywords.set('false', TokenKind.FALSE)
+        keywords.set('for', TokenKind.FOR)
+        keywords.set('fun', TokenKind.FUN)
+        keywords.set('if', TokenKind.IF)
+        keywords.set('nil', TokenKind.NIL)
+        keywords.set('or', TokenKind.OR)
+        keywords.set('print', TokenKind.PRINT)
+        keywords.set('return', TokenKind.RETURN)
+        keywords.set('super', TokenKind.SUPER)
+        keywords.set('this', TokenKind.THIS)
+        keywords.set('true', TokenKind.TRUE)
+        keywords.set('var', TokenKind.VAR)
+        keywords.set('while', TokenKind.WHILE)
+
+        return keywords
+    }
+
+    isDigit(c: string): boolean {
+        if (c >= '0' && c <= '9') {
+            return true
+        }
+
+        return false
+    }
+
+    isAlphabet(c: string): boolean {
+        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c === '_'
+    }
+
+    isAplhaNumeric(c: string): boolean {
+        return this.isAlphabet(c) || this.isDigit(c)
     }
 
     match(expected: string): boolean {
@@ -158,13 +205,22 @@ class Lexer {
         return this.sourceCode.charAt(this.current)
     }
 
+    peekNext(): string {
+        if (this.current + 1 >= this.sourceCode.length) {
+            return '\n'
+        }
+
+        return this.sourceCode.charAt(this.current + 1)
+    }
+
     string(): void {
         while (this.peek() !== '"' && !this.isAtEnd()) {
             if (this.peek() === '\n') this.line++
             this.advance()
         }
         if (this.peek() !== '"') {
-            TLang.error(this.line, `Unterminated string`)
+            TLang.reportError(this.line, `Unterminated string`)
+            return
         }
 
         this.advance()
@@ -174,6 +230,39 @@ class Lexer {
             this.current - 1
         )
         this.addTokenWithLiteral(TokenKind.STRING, value)
+    }
+
+    number(): void {
+        while (this.isDigit(this.peek())) {
+            this.advance()
+        }
+
+        if (this.peek() === '.' && this.isDigit(this.peekNext())) {
+            this.advance()
+
+            while (this.isDigit(this.peek())) {
+                this.advance()
+            }
+        }
+
+        this.addTokenWithLiteral(
+            TokenKind.NUMBER,
+            Number(this.sourceCode.substring(this.start, this.current))
+        )
+    }
+
+    identifier(): void {
+        while (this.isAplhaNumeric(this.peek())) {
+            this.advance()
+        }
+
+        const text = this.sourceCode.substring(this.start, this.current)
+        let type = Lexer.keywords.get(text)
+
+        if (!type) {
+            type = TokenKind.IDENTIFIER
+        }
+        this.addToken(type)
     }
 
     advance(): string {

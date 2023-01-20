@@ -38,7 +38,7 @@ class TLang {
         console.error(chalk.red(`[Line ${line}] Error ${where}: ${message}`))
     }
 
-    static error(line: number, message: string) {
+    static reportError(line: number, message: string) {
         this.report(line, '', message)
         this.hadError = true
     }
@@ -49,9 +49,16 @@ class TLang {
         const tokens: Array<Token> = lexer.lex()
 
         if (this.hadError) return
+
         tokens.forEach((token) => {
             console.log(token.toString())
         })
+
+        // if (this.hadError) {
+        //     tokens.forEach((token) => {
+        //         console.log(token.toString())
+        //     })
+        // }
     }
 
     static runFile(path: string) {
