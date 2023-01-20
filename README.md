@@ -2,9 +2,13 @@
 
 Tes is dynamically typed interpreted object oriented programming language written in typescript
 
+## Parser
+
+Recursive Descent Parser
+
 ## Grammar
 
-```js
+```
 expression → literal
 | unary
 | binary

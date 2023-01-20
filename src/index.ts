@@ -1,3 +1,3 @@
-import Tlang from './tlang/TLang'
+import TesLang from './tes_lang/TesLang'
 
-Tlang.main()
+TesLang.main()

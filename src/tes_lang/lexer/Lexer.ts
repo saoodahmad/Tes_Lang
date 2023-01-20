@@ -1,8 +1,8 @@
-import TLang from '../TLang'
+import TLang from '../TesLang'
 import Token from './Token'
 import { TokenKind } from './TokenType.enum'
 
-class Lexer {
+export default class Lexer {
     sourceCode: string
 
     tokens: Array<Token> = []
@@ -301,5 +301,3 @@ class Lexer {
         this.tokens.push(new Token(type, text, literal, this.line))
     }
 }
-
-export default Lexer

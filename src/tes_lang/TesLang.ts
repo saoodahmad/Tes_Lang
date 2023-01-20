@@ -4,19 +4,19 @@ import { createInterface } from 'readline'
 import Lexer from './lexer/Lexer'
 import Token from './lexer/Token'
 
-class TLang {
+class TesLang {
     static hadError = false
 
     static main(): void {
         console.info(
-            chalk.hex('#83aaff')(`
-            ████████╗██╗░░░░░░█████╗░███╗░░██╗░██████╗░
-            ╚══██╔══╝██║░░░░░██╔══██╗████╗░██║██╔════╝░
-            ░░░██║░░░██║░░░░░███████║██╔██╗██║██║░░██╗░
-            ░░░██║░░░██║░░░░░██╔══██║██║╚████║██║░░╚██╗
-            ░░░██║░░░███████╗██║░░██║██║░╚███║╚██████╔╝
-            ░░░╚═╝░░░╚══════╝╚═╝░░╚═╝╚═╝░░╚══╝░╚═════╝░
-                https://github.com/saoodahmad/TLang
+            chalk.hex('#83aaff')(`       
+                       ████████╗███████╗░██████╗
+                       ╚══██╔══╝██╔════╝██╔════╝
+                       ░░░██║░░░█████╗░░╚█████╗░
+                       ░░░██║░░░██╔══╝░░░╚═══██╗
+                       ░░░██║░░░███████╗██████╔╝
+                       ░░░╚═╝░░░╚══════╝╚═════╝░
+                https://github.com/saoodahmad/Tes_Lang
           `)
         )
 
@@ -62,7 +62,7 @@ class TLang {
             this.run(sourceCode)
 
             if (this.hadError) {
-                process.exit(65)
+                process.exit(0)
             }
         } catch (error) {
             console.error(chalk.red(`File not found at path '${path}'`))
@@ -90,4 +90,4 @@ class TLang {
     }
 }
 
-export default TLang
+export default TesLang
