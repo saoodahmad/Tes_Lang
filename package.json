@@ -1,5 +1,5 @@
 {
-    "name": "tlang",
+    "name": "tes_lang",
     "version": "1.0.0",
     "description": "A toy compiler written in typescript",
     "type": "module",
@@ -12,18 +12,19 @@
         "lint:fix": "eslint src --fix",
         "test": "jest --detectOpenHandles",
         "prepare": "husky install",
-        "cli": "node --es-module-specifier-resolution=node dist/cli/cli.js"
+        "generateast": "nodemon src/tools/GenaretAst.js",
+        "cli": "node  dist/cli/cli.js"
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/saoodahmad/TLang.git"
+        "url": "git+https://github.com/saoodahmad/Tes_Lang.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/saoodahmad/TLang/issues"
+        "url": "https://github.com/saoodahmad/Tes_Lang/issues"
     },
-    "homepage": "https://github.com/saoodahmad/TLang#readme",
+    "homepage": "https://github.com/saoodahmad/Tes_Lang#readme",
     "dependencies": {
         "chalk": "^5.2.0",
         "pkg": "^5.8.0"

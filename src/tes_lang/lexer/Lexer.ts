@@ -3,7 +3,7 @@ import Token from './Token'
 import { TokenKind } from './TokenType.enum'
 
 export default class Lexer {
-    sourceCode: string
+    readonly sourceCode: string
 
     tokens: Array<Token> = []
 
@@ -13,7 +13,7 @@ export default class Lexer {
 
     line = 1
 
-    static keywords: Map<string, TokenKind> = this.initializeKeywords()
+    static readonly keywords: Map<string, TokenKind> = this.initializeKeywords()
 
     constructor(sourceCode: string) {
         this.sourceCode = sourceCode.trimEnd()

@@ -1,7 +1,7 @@
-import { TypeTokenKind } from './TokenType.enum'
+import { TokenKind } from './TokenType.enum'
 
 export default class Token {
-    readonly type: TypeTokenKind
+    readonly type: TokenKind
 
     readonly lexeme: string
 
@@ -10,7 +10,7 @@ export default class Token {
     readonly line: number
 
     constructor(
-        type: TypeTokenKind,
+        type: TokenKind,
         lexeme: string,
         literal: unknown,
         line: number

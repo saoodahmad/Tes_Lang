@@ -3,9 +3,21 @@ import * as fs from 'fs'
 import { createInterface } from 'readline'
 import Lexer from './lexer/Lexer'
 import Token from './lexer/Token'
+import { TokenKind } from './lexer/TokenType.enum'
+import Parser from './parser/Parser'
+import RuntimeError from './interpreter/RuntimeError'
+import Interpreter from './interpreter/Interpreter'
 
 class TesLang {
     static hadError = false
+
+    static hadRuntimeError = false
+
+    static output = ''
+
+    static errorOutput = ''
+
+    private static interpreter: Interpreter = new Interpreter()
 
     static main(): void {
         console.info(
@@ -24,9 +36,9 @@ class TesLang {
 
         if (args.length > 1) {
             console.info(
-                chalk.hex('#83aaff')(`\tcommand: npm run cli <filepath>`)
+                chalk.hex('#83aaff')(`\tcommand: npm start <filepath>`)
             )
-            process.exit(65)
+            process.exit(0)
         } else if (args.length === 1) {
             this.runFile(args[0])
         } else {
@@ -38,9 +50,22 @@ class TesLang {
         console.error(chalk.red(`[Line ${line}] Error ${where}: ${message}`))
     }
 
+    static error(token: Token, message: string): void {
+        if (token.type === TokenKind.EOF) {
+            this.report(token.line, ' at end', message)
+        } else {
+            this.report(token.line, ` at '${token.lexeme}'`, message)
+        }
+    }
+
+    static runTimeError(error: RuntimeError) {
+        console.log(`${error.message}\n [line ${error.token.line} ]`)
+        TesLang.hadRuntimeError = true
+    }
+
     static reportError(line: number, message: string) {
         this.report(line, '', message)
-        this.hadError = true
+        TesLang.hadError = true
     }
 
     static run(source: string) {
@@ -48,7 +73,13 @@ class TesLang {
 
         const tokens: Array<Token> = lexer.lex()
 
+        const parser: Parser = new Parser(tokens)
+
+        const expression = parser.parse()
+
         if (this.hadError) return
+
+        this.interpreter.interpret(expression)
 
         tokens.forEach((token) => {
             console.log(token.toString())
@@ -57,13 +88,17 @@ class TesLang {
 
     static runFile(path: string) {
         try {
+            if (path.indexOf('.tes') === -1) {
+                console.error(chalk.red(`Invalid file extension`))
+                return
+            }
             const sourceCode = fs.readFileSync(path, 'utf8')
 
             this.run(sourceCode)
 
-            if (this.hadError) {
-                process.exit(0)
-            }
+            if (this.hadError) process.exit(1)
+
+            if (this.hadRuntimeError) process.exit(1)
         } catch (error) {
             console.error(chalk.red(`File not found at path '${path}'`))
         }
