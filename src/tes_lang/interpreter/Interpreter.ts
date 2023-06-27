@@ -1,12 +1,12 @@
 import TesLang from '../TesLang'
 import Token from '../lexer/Token'
 import { TokenKind } from '../lexer/TokenType.enum'
-import BinaryExpression from '../parser/expression/BinaryExpression'
-import Expression from '../parser/expression/Expression'
-import GroupingExpression from '../parser/expression/GroupingExpression'
-import LiteralExpression from '../parser/expression/LiteralExpression'
-import UnaryExpression from '../parser/expression/UnaryExpression'
-import expressionVisitor from '../parser/expression/Visitor'
+import BinaryExpression from '../syntax/expression/BinaryExpression'
+import Expression from '../syntax/expression/Expression'
+import GroupingExpression from '../syntax/expression/GroupingExpression'
+import LiteralExpression from '../syntax/expression/LiteralExpression'
+import UnaryExpression from '../syntax/expression/UnaryExpression'
+import expressionVisitor from '../syntax/expression/Visitor'
 import RuntimeError from './RuntimeError'
 
 export default class Interpreter implements expressionVisitor<any> {

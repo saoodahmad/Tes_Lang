@@ -2,11 +2,11 @@ import TesLang from '../TesLang'
 import Token from '../lexer/Token'
 import { TokenKind } from '../lexer/TokenType.enum'
 import ParseError from './ParseError'
-import BinaryExpression from './expression/BinaryExpression'
-import Expression from './expression/Expression'
-import GroupingExpression from './expression/GroupingExpression'
-import LiteralExpression from './expression/LiteralExpression'
-import UnaryExpression from './expression/UnaryExpression'
+import BinaryExpression from '../syntax/expression/BinaryExpression'
+import Expression from '../syntax/expression/Expression'
+import GroupingExpression from '../syntax/expression/GroupingExpression'
+import LiteralExpression from '../syntax/expression/LiteralExpression'
+import UnaryExpression from '../syntax/expression/UnaryExpression'
 
 export default class Parser {
     tokens = new Array<Token>()
