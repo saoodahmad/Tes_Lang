@@ -16,7 +16,7 @@ export default class Lexer {
     static readonly keywords: Map<string, TokenKind> = this.initializeKeywords()
 
     constructor(sourceCode: string) {
-        this.sourceCode = sourceCode.trimEnd()
+        this.sourceCode = sourceCode.trim()
     }
 
     lex(): Array<Token> {

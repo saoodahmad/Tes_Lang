@@ -59,7 +59,7 @@ class TesLang {
     }
 
     static runTimeError(error: RuntimeError) {
-        console.log(`${error.message}\n [line ${error.token.line} ]`)
+        console.log(chalk.red(`[Line ${error.token.line}] ${error.message}`))
         TesLang.hadRuntimeError = true
     }
 
@@ -69,6 +69,10 @@ class TesLang {
     }
 
     static run(source: string) {
+        if (source.trim().length === 0) {
+            return
+        }
+
         const lexer: Lexer = new Lexer(source)
 
         const tokens: Array<Token> = lexer.lex()
@@ -80,10 +84,6 @@ class TesLang {
         if (this.hadError) return
 
         this.interpreter.interpret(expression)
-
-        tokens.forEach((token) => {
-            console.log(token.toString())
-        })
     }
 
     static runFile(path: string) {
@@ -100,6 +100,7 @@ class TesLang {
 
             if (this.hadRuntimeError) process.exit(1)
         } catch (error) {
+            console.log(error)
             console.error(chalk.red(`File not found at path '${path}'`))
         }
     }

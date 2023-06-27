@@ -42,15 +42,15 @@ export default class Interpreter implements expressionVisitor<any> {
 
                 return parseFloat(left) - parseFloat(right)
             case TokenKind.PLUS:
-                if (!Number.isNaN(left) && !Number.isNaN(right)) {
-                    return parseFloat(left) + parseFloat(right)
+                if (typeof left === 'number' && typeof right === 'number') {
+                    return left + right
                 }
 
                 if (typeof left === 'string' && typeof right === 'string') {
                     return left + right
                 }
 
-                return new RuntimeError(
+                throw new RuntimeError(
                     expression.operator,
                     'Operands must be two numbers or two strings.'
                 )
