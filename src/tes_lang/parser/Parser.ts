@@ -7,6 +7,9 @@ import Expression from '../syntax/expression/Expression'
 import GroupingExpression from '../syntax/expression/GroupingExpression'
 import LiteralExpression from '../syntax/expression/LiteralExpression'
 import UnaryExpression from '../syntax/expression/UnaryExpression'
+import Statement from '../syntax/statement/Statement'
+import PrintStatement from '../syntax/statement/PrintStatement'
+import ExpressionStatement from '../syntax/statement/ExpressionStatment'
 
 export default class Parser {
     tokens = new Array<Token>()
@@ -17,9 +20,14 @@ export default class Parser {
         this.tokens = tokens
     }
 
-    parse(): Expression {
+    parse(): Statement[] {
         try {
-            return this.expression()
+            const statements: Statement[] = []
+
+            while (!this.isAtEnd()) {
+                statements.push(this.statement())
+            }
+            return statements
         } catch (error) {
             return null
         }
@@ -27,6 +35,30 @@ export default class Parser {
 
     expression(): Expression {
         return this.equality()
+    }
+
+    statement(): Statement {
+        if (this.match([TokenKind.PRINT])) {
+            return this.printStatement()
+        }
+
+        return this.expressionStatment()
+    }
+
+    printStatement(): PrintStatement {
+        const value: Expression = this.expression()
+
+        this.consume(TokenKind.SEMICOLON, "Expect ';' after value")
+
+        return new PrintStatement(value)
+    }
+
+    expressionStatment(): ExpressionStatement {
+        const value: Expression = this.expression()
+
+        this.consume(TokenKind.SEMICOLON, "Expect ';' after value")
+
+        return new ExpressionStatement(value)
     }
 
     equality(): Expression {

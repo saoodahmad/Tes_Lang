@@ -79,11 +79,11 @@ class TesLang {
 
         const parser: Parser = new Parser(tokens)
 
-        const expression = parser.parse()
+        const statements = parser.parse()
 
         if (this.hadError) return
 
-        this.interpreter.interpret(expression)
+        this.interpreter.interpret(statements)
     }
 
     static runFile(path: string) {

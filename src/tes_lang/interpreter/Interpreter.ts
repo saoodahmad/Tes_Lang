@@ -7,18 +7,15 @@ import GroupingExpression from '../syntax/expression/GroupingExpression'
 import LiteralExpression from '../syntax/expression/LiteralExpression'
 import UnaryExpression from '../syntax/expression/UnaryExpression'
 import expressionVisitor from '../syntax/expression/Visitor'
+import ExpressionStatement from '../syntax/statement/ExpressionStatment'
+import PrintStatement from '../syntax/statement/PrintStatement'
+import Statement from '../syntax/statement/Statement'
+import statementVisitor from '../syntax/statement/Visitor'
 import RuntimeError from './RuntimeError'
 
-export default class Interpreter implements expressionVisitor<any> {
-    interpret(expression: Expression) {
-        try {
-            const value = this.evaluate(expression)
-            console.log(value)
-        } catch (error) {
-            TesLang.runTimeError(error)
-        }
-    }
-
+export default class Interpreter
+    implements expressionVisitor<unknown>, statementVisitor<unknown>
+{
     visitBinaryExpression(expression: BinaryExpression) {
         const left = this.evaluate(expression.left)
 
@@ -86,6 +83,29 @@ export default class Interpreter implements expressionVisitor<any> {
         return null
     }
 
+    visitExpressionStatment(stmt: ExpressionStatement): unknown {
+        this.evaluate(stmt.expression)
+        return null
+    }
+
+    visitPrintStatement(stmt: PrintStatement): unknown {
+        const value = this.evaluate(stmt.expression)
+
+        console.log(value)
+
+        return null
+    }
+
+    interpret(statements: Statement[]) {
+        try {
+            statements.forEach((statement) => {
+                this.execute(statement)
+            })
+        } catch (error) {
+            TesLang.runTimeError(error)
+        }
+    }
+
     checkNumberOperand(operator: Token, operand: unknown) {
         if (!Number.isNaN(operand)) return
         throw new RuntimeError(operator, 'Operand must be a number.')
@@ -96,7 +116,7 @@ export default class Interpreter implements expressionVisitor<any> {
         throw new RuntimeError(operator, 'Operands must be a number.')
     }
 
-    visitLiteralExpression(expression: LiteralExpression): any {
+    visitLiteralExpression(expression: LiteralExpression): unknown {
         return expression.value
     }
 
@@ -108,7 +128,11 @@ export default class Interpreter implements expressionVisitor<any> {
         return expression.accept(this)
     }
 
-    private isTruthy(object: any): boolean {
+    private execute(statement: Statement) {
+        return statement.accept(this)
+    }
+
+    private isTruthy(object: unknown): boolean {
         if (object == null) return false
 
         if (object === true || object === false) return object
