@@ -16,11 +16,10 @@ export default class Lexer {
     static readonly keywords: Map<string, TokenKind> = this.initializeKeywords()
 
     constructor(sourceCode: string) {
-        this.sourceCode = sourceCode.trim()
+        this.sourceCode = sourceCode
     }
 
     lex(): Array<Token> {
-        // scan string and create tokens
         while (!this.isAtEnd()) {
             this.start = this.current
             this.scanToken()
@@ -140,7 +139,7 @@ export default class Lexer {
                 } else if (this.isAlphabet(c)) {
                     this.identifier()
                 } else {
-                    TLang.reportError(this.line, `Unexpected character '${c}'`)
+                    this.error(this.line, `Unexpected character '${c}'`)
                 }
                 break
         }
@@ -215,7 +214,7 @@ export default class Lexer {
             this.advance()
         }
         if (this.peek() !== '"') {
-            TLang.reportError(this.line, `Unterminated string`)
+            this.error(this.line, `Unterminated string`)
             return
         }
 
@@ -278,7 +277,7 @@ export default class Lexer {
         }
 
         if (this.isAtEnd()) {
-            TLang.reportError(this.line, 'Unterminated comment')
+            this.error(this.line, 'Unterminated comment')
             return
         }
 
@@ -299,5 +298,9 @@ export default class Lexer {
     addTokenWithLiteral(type: TokenKind, literal: unknown): void {
         const text = this.sourceCode.substring(this.start, this.current)
         this.tokens.push(new Token(type, text, literal, this.line))
+    }
+
+    error(line: number, message: string) {
+        TLang.reportLexicalError(line, message)
     }
 }

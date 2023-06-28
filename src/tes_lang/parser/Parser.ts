@@ -202,8 +202,7 @@ export default class Parser {
     }
 
     error(token: Token, message: string): ParseError {
-        TesLang.error(token, message)
-
+        TesLang.reportParserError(token, message)
         return new ParseError()
     }
 

@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import * as fs from 'fs'
-import { createInterface } from 'readline'
 import Lexer from './lexer/Lexer'
 import Token from './lexer/Token'
 import { TokenKind } from './lexer/TokenType.enum'
@@ -9,48 +8,47 @@ import RuntimeError from './interpreter/RuntimeError'
 import Interpreter from './interpreter/Interpreter'
 
 class TesLang {
-    static hadError = false
+    static hasLexicalError = false
 
-    static hadRuntimeError = false
+    static hasParserError = false
+
+    static hasInterpreterError = false
 
     static output = ''
 
-    static errorOutput = ''
+    static error = ''
 
     private static interpreter: Interpreter = new Interpreter()
 
-    static main(): void {
-        console.info(
-            chalk.hex('#83aaff')(`       
-            ████████╗███████╗░██████╗
-            ╚══██╔══╝██╔════╝██╔════╝
-            ░░░██║░░░█████╗░░╚█████╗░
-            ░░░██║░░░██╔══╝░░░╚═══██╗
-            ░░░██║░░░███████╗██████╔╝
-            ░░░╚═╝░░░╚══════╝╚═════╝░
-      https://github.com/saoodahmad/Tes_Lang
-          `)
-        )
-
-        const args: string[] = process.argv.slice(2)
-
-        if (args.length > 1) {
-            console.info(
-                chalk.hex('#83aaff')(`\tcommand: npm start <filepath>`)
-            )
-            process.exit(0)
-        } else if (args.length === 1) {
-            this.runFile(args[0])
-        } else {
-            this.runPrompt()
-        }
-    }
-
     static report(line: number, where: string, message: string) {
-        console.error(chalk.red(`[Line ${line}] Error ${where}: ${message}`))
+        TesLang.error += `${chalk.red(
+            `[Line ${line}] ${TesLang.getErrorType()} Error ${where}: ${message}`
+        )}\n`
     }
 
-    static error(token: Token, message: string): void {
+    static getErrorType(): string {
+        if (TesLang.hasLexicalError) {
+            return 'Lexer'
+        }
+
+        if (TesLang.hasParserError) {
+            return 'Parser'
+        }
+
+        if (TesLang.hasInterpreterError) {
+            return 'Interpreter'
+        }
+
+        return ''
+    }
+
+    static reportLexicalError(line: number, message: string) {
+        TesLang.hasLexicalError = true
+        this.report(line, '', message)
+    }
+
+    static reportParserError(token: Token, message: string): void {
+        TesLang.hasParserError = true
         if (token.type === TokenKind.EOF) {
             this.report(token.line, ' at end', message)
         } else {
@@ -58,30 +56,23 @@ class TesLang {
         }
     }
 
-    static runTimeError(error: RuntimeError) {
-        console.log(chalk.red(`[Line ${error.token.line}] ${error.message}`))
-        TesLang.hadRuntimeError = true
-    }
-
-    static reportError(line: number, message: string) {
-        this.report(line, '', message)
-        TesLang.hadError = true
+    static reportInpterpreterError(error: RuntimeError) {
+        TesLang.hasInterpreterError = true
+        this.report(error.token.line, '', error.message)
     }
 
     static run(source: string) {
-        if (source.trim().length === 0) {
-            return
-        }
-
         const lexer: Lexer = new Lexer(source)
 
         const tokens: Array<Token> = lexer.lex()
+
+        if (TesLang.hasLexicalError) return
 
         const parser: Parser = new Parser(tokens)
 
         const statements = parser.parse()
 
-        if (this.hadError) return
+        if (TesLang.hasParserError) return
 
         this.interpreter.interpret(statements)
     }
@@ -92,37 +83,24 @@ class TesLang {
                 console.error(chalk.red(`Invalid file extension`))
                 return
             }
-            const sourceCode = fs.readFileSync(path, 'utf8')
+
+            const sourceCode = fs.readFileSync(path, 'utf8').trimEnd()
 
             this.run(sourceCode)
 
-            if (this.hadError) process.exit(1)
+            if (
+                TesLang.hasLexicalError ||
+                TesLang.hasParserError ||
+                TesLang.hasInterpreterError
+            ) {
+                console.error(TesLang.error)
+                process.exit(1)
+            }
 
-            if (this.hadRuntimeError) process.exit(1)
+            console.log(TesLang.output)
         } catch (error) {
-            console.log(error)
             console.error(chalk.red(`File not found at path '${path}'`))
         }
-    }
-
-    static runPrompt() {
-        process.stdout.write('> ')
-
-        const readline = createInterface({
-            input: process.stdin,
-        })
-
-        readline.on('line', (line) => {
-            const trimmedLine = line.trim()
-
-            if (trimmedLine.length === 0) {
-                console.error(chalk.red(`No input found`))
-            } else {
-                this.run(line)
-                this.hadError = false
-            }
-            process.stdout.write('> ')
-        })
     }
 }
 

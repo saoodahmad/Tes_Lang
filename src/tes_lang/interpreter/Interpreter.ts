@@ -47,7 +47,7 @@ export default class Interpreter
                     return left + right
                 }
 
-                throw new RuntimeError(
+                return this.error(
                     expression.operator,
                     'Operands must be two numbers or two strings.'
                 )
@@ -90,9 +90,7 @@ export default class Interpreter
 
     visitPrintStatement(stmt: PrintStatement): unknown {
         const value = this.evaluate(stmt.expression)
-
-        console.log(value)
-
+        TesLang.output += `${value}\n`
         return null
     }
 
@@ -102,18 +100,23 @@ export default class Interpreter
                 this.execute(statement)
             })
         } catch (error) {
-            TesLang.runTimeError(error)
+            TesLang.reportInpterpreterError(error)
         }
     }
 
-    checkNumberOperand(operator: Token, operand: unknown) {
-        if (!Number.isNaN(operand)) return
-        throw new RuntimeError(operator, 'Operand must be a number.')
+    checkNumberOperand(operator: Token, operand: unknown): unknown {
+        if (!Number.isNaN(operand)) return null
+
+        return this.error(operator, 'Operand must be a number.')
     }
 
-    checkNumberOperands(operator: Token, left: unknown, right: unknown) {
-        if (!Number.isNaN(left) && !Number.isNaN(right)) return
-        throw new RuntimeError(operator, 'Operands must be a number.')
+    checkNumberOperands(
+        operator: Token,
+        left: unknown,
+        right: unknown
+    ): unknown {
+        if (!Number.isNaN(left) && !Number.isNaN(right)) return null
+        return this.error(operator, 'Operands must be a number.')
     }
 
     visitLiteralExpression(expression: LiteralExpression): unknown {
@@ -146,5 +149,9 @@ export default class Interpreter
         }
 
         return true
+    }
+
+    error(token: Token, message: string) {
+        throw new RuntimeError(token, message)
     }
 }
