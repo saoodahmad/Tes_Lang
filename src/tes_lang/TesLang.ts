@@ -1,5 +1,3 @@
-import chalk from 'chalk'
-import * as fs from 'fs'
 import Lexer from './lexer/Lexer'
 import Token from './lexer/Token'
 import { TokenKind } from './lexer/TokenType.enum'
@@ -21,9 +19,7 @@ class TesLang {
     private static interpreter: Interpreter = new Interpreter()
 
     static report(line: number, where: string, message: string) {
-        TesLang.error += `${chalk.red(
-            `[Line ${line}] ${TesLang.getErrorType()} Error ${where}: ${message}`
-        )}\n`
+        TesLang.error += `${`[Line ${line}] ${TesLang.getErrorType()} Error ${where}: ${message}`}\n`
     }
 
     static getErrorType(): string {
@@ -75,32 +71,6 @@ class TesLang {
         if (TesLang.hasParserError) return
 
         this.interpreter.interpret(statements)
-    }
-
-    static runFile(path: string) {
-        try {
-            if (path.indexOf('.tes') === -1) {
-                console.error(chalk.red(`Invalid file extension`))
-                return
-            }
-
-            const sourceCode = fs.readFileSync(path, 'utf8').trimEnd()
-
-            this.run(sourceCode)
-
-            if (
-                TesLang.hasLexicalError ||
-                TesLang.hasParserError ||
-                TesLang.hasInterpreterError
-            ) {
-                console.error(TesLang.error)
-                process.exit(1)
-            }
-
-            console.log(TesLang.output)
-        } catch (error) {
-            console.error(chalk.red(`File not found at path '${path}'`))
-        }
     }
 }
 

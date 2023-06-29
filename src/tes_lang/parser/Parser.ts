@@ -201,8 +201,9 @@ export default class Parser {
         return this.tokens[this.current - 1]
     }
 
-    error(token: Token, message: string): ParseError {
+    error(token: Token, message: string) {
         TesLang.reportParserError(token, message)
+        // this.synchronize()
         return new ParseError()
     }
 
