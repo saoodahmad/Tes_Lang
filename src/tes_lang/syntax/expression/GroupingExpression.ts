@@ -1,5 +1,5 @@
 import Expression from './Expression'
-import Visitor from './Visitor'
+import Visitor from '../declaration/Visitor'
 
 export default class GroupingExpression extends Expression {
     expression: Expression

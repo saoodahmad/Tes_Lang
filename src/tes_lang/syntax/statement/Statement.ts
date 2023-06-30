@@ -1,6 +1,3 @@
-import Declaration from '../Declaration'
-import Visitor from './Visitor'
+import Declaration from '../declaration/Declaration'
 
-export default abstract class Statement extends Declaration {
-    abstract accept<T>(visitor: Visitor<T>): T
-}
+export default abstract class Statement extends Declaration {}

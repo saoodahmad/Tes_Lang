@@ -1,13 +1,13 @@
 import Token from '../../lexer/Token'
-import Expression from './Expression'
 import Visitor from '../declaration/Visitor'
+import Expression from './Expression'
 
-export default class BinaryExpression extends Expression {
+export default class LogicalExpression extends Expression {
     left: Expression
 
-    right: Expression
-
     operator: Token
+
+    right: Expression
 
     constructor(left: Expression, operator: Token, right: Expression) {
         super()
@@ -17,6 +17,6 @@ export default class BinaryExpression extends Expression {
     }
 
     accept<T>(visitor: Visitor<T>): T {
-        return visitor.visitBinaryExpression(this)
+        return visitor.visitLogicalExpression(this)
     }
 }

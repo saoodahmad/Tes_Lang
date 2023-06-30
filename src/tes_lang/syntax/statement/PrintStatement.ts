@@ -1,6 +1,6 @@
 import Expression from '../expression/Expression'
 import Statement from './Statement'
-import Visitor from './Visitor'
+import Visitor from '../declaration/Visitor'
 
 export default class PrintStatement extends Statement {
     expression: Expression

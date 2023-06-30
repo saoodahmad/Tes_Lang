@@ -10,6 +10,13 @@ import UnaryExpression from '../syntax/expression/UnaryExpression'
 import Statement from '../syntax/statement/Statement'
 import PrintStatement from '../syntax/statement/PrintStatement'
 import ExpressionStatement from '../syntax/statement/ExpressionStatment'
+import Declaration from '../syntax/declaration/Declaration'
+import VariableDeclaration from '../syntax/declaration/VariableDeclaration'
+import VariableExpression from '../syntax/expression/VariableExpression'
+import AssignExpression from '../syntax/expression/AssignExpression'
+import BlockStatement from '../syntax/statement/BlockStatement'
+import IfStatement from '../syntax/statement/IfStatement'
+import LogicalExpression from '../syntax/expression/LogicalExpression'
 
 export default class Parser {
     tokens = new Array<Token>()
@@ -20,29 +27,71 @@ export default class Parser {
         this.tokens = tokens
     }
 
-    parse(): Statement[] {
+    parse(): Declaration[] {
         try {
-            const statements: Statement[] = []
+            const declarations: Declaration[] = []
 
             while (!this.isAtEnd()) {
-                statements.push(this.statement())
+                declarations.push(this.declaration())
             }
-            return statements
+            return declarations
         } catch (error) {
             return null
         }
     }
 
-    expression(): Expression {
-        return this.equality()
+    declaration(): Declaration {
+        if (this.match([TokenKind.VAR])) {
+            const identifier = this.advance()
+
+            let initializer: Expression = null
+
+            if (this.match([TokenKind.EQUAL])) {
+                initializer = this.expression()
+            }
+
+            this.consume(
+                TokenKind.SEMICOLON,
+                "Expect ';' after variable declaration"
+            )
+
+            return new VariableDeclaration(identifier, initializer)
+        }
+
+        return this.statement()
     }
 
     statement(): Statement {
+        if (this.match([TokenKind.IF])) {
+            return this.ifStatment()
+        }
+
         if (this.match([TokenKind.PRINT])) {
             return this.printStatement()
         }
+        if (this.match([TokenKind.LEFT_BRACE])) {
+            return this.blockStatement()
+        }
 
         return this.expressionStatment()
+    }
+
+    ifStatment(): IfStatement {
+        this.consume(TokenKind.LEFT_PAREN, "Expect '(' after 'if'.")
+
+        const condition = this.expression()
+
+        this.consume(TokenKind.RIGHT_PAREN, "Expect ')' after if condition.")
+
+        const thenBranch = this.statement()
+
+        let elseBranch = null
+
+        if (this.match([TokenKind.ELSE])) {
+            elseBranch = this.statement()
+        }
+
+        return new IfStatement(condition, thenBranch, elseBranch)
     }
 
     printStatement(): PrintStatement {
@@ -61,10 +110,72 @@ export default class Parser {
         return new ExpressionStatement(value)
     }
 
+    blockStatement(): BlockStatement {
+        const declarations: Declaration[] = []
+
+        while (!this.check(TokenKind.RIGHT_BRACE) && !this.isAtEnd()) {
+            declarations.push(this.declaration())
+        }
+
+        this.consume(TokenKind.RIGHT_BRACE, "Expect '}' after block.")
+
+        return new BlockStatement(declarations)
+    }
+
+    expression(): Expression {
+        return this.assignment()
+    }
+
+    assignment(): Expression {
+        const expr = this.or()
+
+        if (this.match([TokenKind.EQUAL])) {
+            const equals: Token = this.previous()
+
+            const value: Expression = this.assignment()
+
+            if (expr instanceof VariableExpression) {
+                return new AssignExpression(expr.name, value)
+            }
+
+            this.error(equals, 'Invalid assignemt target.')
+        }
+
+        return expr
+    }
+
+    or(): Expression {
+        let left = this.and()
+
+        while (this.match([TokenKind.OR])) {
+            const operator = this.previous()
+
+            const right = this.and()
+
+            left = new LogicalExpression(left, operator, right)
+        }
+
+        return left
+    }
+
+    and(): Expression {
+        let left = this.equality()
+
+        while (this.match([TokenKind.AND])) {
+            const operator = this.previous()
+
+            const right = this.and()
+
+            left = new LogicalExpression(left, operator, right)
+        }
+
+        return left
+    }
+
     equality(): Expression {
         let expr = this.comparison()
 
-        if (this.match([TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL])) {
+        while (this.match([TokenKind.BANG_EQUAL, TokenKind.EQUAL_EQUAL])) {
             const operator = this.previous()
 
             const right = this.comparison()
@@ -78,7 +189,7 @@ export default class Parser {
     comparison(): Expression {
         let expr = this.term()
 
-        if (
+        while (
             this.match([
                 TokenKind.GREATER,
                 TokenKind.GREATER_EQUAL,
@@ -99,20 +210,26 @@ export default class Parser {
     term(): Expression {
         let expr = this.factor()
 
-        if (this.match([TokenKind.PLUS, TokenKind.MINUS])) {
+        // console.log('left', expr)
+
+        while (this.match([TokenKind.PLUS, TokenKind.MINUS])) {
             const operator = this.previous()
 
             const right = this.factor()
 
+            // console.log(right, 'expr')
+
             expr = new BinaryExpression(expr, operator, right)
         }
+
+        // console.log(expr)
 
         return expr
     }
 
     factor(): Expression {
         let expr = this.unary()
-        if (this.match([TokenKind.SLASH, TokenKind.STAR])) {
+        while (this.match([TokenKind.SLASH, TokenKind.STAR])) {
             const operator = this.previous()
 
             const right = this.unary()
@@ -150,6 +267,10 @@ export default class Parser {
 
         if (this.match([TokenKind.NUMBER, TokenKind.STRING])) {
             return new LiteralExpression(this.previous().literal)
+        }
+
+        if (this.match([TokenKind.IDENTIFIER])) {
+            return new VariableExpression(this.previous())
         }
 
         if (this.match([TokenKind.LEFT_PAREN])) {

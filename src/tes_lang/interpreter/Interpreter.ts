@@ -6,16 +6,96 @@ import Expression from '../syntax/expression/Expression'
 import GroupingExpression from '../syntax/expression/GroupingExpression'
 import LiteralExpression from '../syntax/expression/LiteralExpression'
 import UnaryExpression from '../syntax/expression/UnaryExpression'
-import expressionVisitor from '../syntax/expression/Visitor'
+
 import ExpressionStatement from '../syntax/statement/ExpressionStatment'
 import PrintStatement from '../syntax/statement/PrintStatement'
-import Statement from '../syntax/statement/Statement'
-import statementVisitor from '../syntax/statement/Visitor'
-import RuntimeError from './RuntimeError'
 
-export default class Interpreter
-    implements expressionVisitor<unknown>, statementVisitor<unknown>
-{
+import visitor from '../syntax/declaration/Visitor'
+import RuntimeError from './RuntimeError'
+import VariableDeclaration from '../syntax/declaration/VariableDeclaration'
+import Declaration from '../syntax/declaration/Declaration'
+import VariableExpression from '../syntax/expression/VariableExpression'
+import Environment from '../environment/Environment'
+import AssignExpression from '../syntax/expression/AssignExpression'
+import BlockStatement from '../syntax/statement/BlockStatement'
+import IfStatement from '../syntax/statement/IfStatement'
+import LogicalExpression from '../syntax/expression/LogicalExpression'
+
+export default class Interpreter implements visitor<unknown> {
+    private environment: Environment = new Environment()
+
+    interpret(declarations: Declaration[]) {
+        try {
+            declarations.forEach((declaration) => {
+                this.execute(declaration)
+            })
+        } catch (error) {
+            TesLang.reportInpterpreterError(error)
+        }
+    }
+
+    visitVariableDeclaration(declaration: VariableDeclaration): unknown {
+        let value: unknown = null
+
+        if (declaration.initializer != null) {
+            value = this.evaluate(declaration.initializer)
+        }
+
+        this.environment.defineVariable(declaration.name, value)
+
+        return null
+    }
+
+    visitExpressionStatment(stmt: ExpressionStatement): unknown {
+        this.evaluate(stmt.expression)
+        return null
+    }
+
+    visitIfStatement(statement: IfStatement): unknown {
+        if (this.isTruthy(this.evaluate(statement.condition))) {
+            this.execute(statement.thenBranch)
+        } else if (statement.elseBranch != null) {
+            this.execute(statement.elseBranch)
+        }
+
+        return null
+    }
+
+    visitPrintStatement(stmt: PrintStatement): unknown {
+        const value = this.evaluate(stmt.expression)
+        TesLang.output += `${value}\n`
+        return null
+    }
+
+    visitBlockStatement(statement: BlockStatement): unknown {
+        this.executeBlock(
+            statement.declarations,
+            new Environment(this.environment)
+        )
+        return null
+    }
+
+    visitAssignExpression(expression: AssignExpression): unknown {
+        const value = this.evaluate(expression.value)
+        this.environment.assign(expression.name, value)
+
+        return value
+    }
+
+    visitVariableExpression(expression: VariableExpression): unknown {
+        return this.environment.get(expression.name)
+    }
+
+    visitLogicalExpression(expression: LogicalExpression): unknown {
+        const left = this.evaluate(expression.left)
+
+        if (expression.operator.type === TokenKind.OR) {
+            if (this.isTruthy(left)) return left
+        } else if (!this.isTruthy(left)) return left
+
+        return this.evaluate(expression.right)
+    }
+
     visitBinaryExpression(expression: BinaryExpression) {
         const left = this.evaluate(expression.left)
 
@@ -83,27 +163,6 @@ export default class Interpreter
         return null
     }
 
-    visitExpressionStatment(stmt: ExpressionStatement): unknown {
-        this.evaluate(stmt.expression)
-        return null
-    }
-
-    visitPrintStatement(stmt: PrintStatement): unknown {
-        const value = this.evaluate(stmt.expression)
-        TesLang.output += `${value}\n`
-        return null
-    }
-
-    interpret(statements: Statement[]) {
-        try {
-            statements.forEach((statement) => {
-                this.execute(statement)
-            })
-        } catch (error) {
-            TesLang.reportInpterpreterError(error)
-        }
-    }
-
     checkNumberOperand(operator: Token, operand: unknown): unknown {
         if (!Number.isNaN(operand)) return null
 
@@ -131,8 +190,25 @@ export default class Interpreter
         return expression.accept(this)
     }
 
-    private execute(statement: Statement) {
-        return statement.accept(this)
+    private execute(declaration: Declaration) {
+        return declaration.accept(this)
+    }
+
+    private executeBlock(
+        declarations: Declaration[],
+        environment: Environment
+    ) {
+        const previous = this.environment
+
+        try {
+            this.environment = environment
+
+            declarations.forEach((declaration) => {
+                this.execute(declaration)
+            })
+        } finally {
+            this.environment = previous
+        }
     }
 
     private isTruthy(object: unknown): boolean {

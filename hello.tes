@@ -1,9 +1,5 @@
-// comments
-print "hello";
-
-print 3
-
-
+print "hi" or 2; // "hi".
+print nil and "yes";
 
 
 

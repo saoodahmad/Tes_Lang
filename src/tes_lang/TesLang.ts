@@ -4,6 +4,7 @@ import { TokenKind } from './lexer/TokenType.enum'
 import Parser from './parser/Parser'
 import RuntimeError from './interpreter/RuntimeError'
 import Interpreter from './interpreter/Interpreter'
+import Declaration from './syntax/declaration/Declaration'
 
 class TesLang {
     static hasLexicalError = false
@@ -66,11 +67,11 @@ class TesLang {
 
         const parser: Parser = new Parser(tokens)
 
-        const statements = parser.parse()
+        const declarations: Declaration[] = parser.parse()
 
         if (TesLang.hasParserError) return
 
-        this.interpreter.interpret(statements)
+        this.interpreter.interpret(declarations)
     }
 }
 

@@ -1,6 +1,6 @@
 import Token from '../../lexer/Token'
 import Expression from './Expression'
-import Visitor from './Visitor'
+import Visitor from '../declaration/Visitor'
 
 export default class UnaryExpression extends Expression {
     operator: Token
