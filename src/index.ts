@@ -43,6 +43,7 @@ const init = () => {
                 process.exit(0)
             }
         } catch (error) {
+            console.log(error)
             console.error(chalk.red(`File not found at path '${path}'`))
             process.exit(1)
         }

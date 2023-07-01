@@ -20,9 +20,16 @@ import AssignExpression from '../syntax/expression/AssignExpression'
 import BlockStatement from '../syntax/statement/BlockStatement'
 import IfStatement from '../syntax/statement/IfStatement'
 import LogicalExpression from '../syntax/expression/LogicalExpression'
+import WhileStatment from '../syntax/statement/WhileStatement'
+import BreakStatement from '../syntax/statement/BreakStatement'
+import BreakError from './BreakError'
+import ForStatment from '../syntax/statement/ForStatement'
+import ContinueStatement from '../syntax/statement/ContinueStatement'
 
 export default class Interpreter implements visitor<unknown> {
     private environment: Environment = new Environment()
+
+    private skip = false
 
     interpret(declarations: Declaration[]) {
         try {
@@ -51,6 +58,31 @@ export default class Interpreter implements visitor<unknown> {
         return null
     }
 
+    visitForStatement(statement: ForStatment): unknown {
+        try {
+            // console.log('for')
+            if (statement.intializer) {
+                this.execute(statement.intializer)
+            }
+
+            while (this.isTruthy(this.evaluate(statement.condition))) {
+                // console.log(this.skip)
+                this.execute(statement.body)
+                this.skip = false
+                if (statement.increment) {
+                    this.evaluate(statement.increment)
+                }
+            }
+        } catch (err: unknown) {
+            // console.log(err)
+            if (err instanceof BreakError) {
+                // console.log('break occured')
+            }
+        }
+
+        return null
+    }
+
     visitIfStatement(statement: IfStatement): unknown {
         if (this.isTruthy(this.evaluate(statement.condition))) {
             this.execute(statement.thenBranch)
@@ -67,7 +99,34 @@ export default class Interpreter implements visitor<unknown> {
         return null
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    visitBreakStatement(_statement: BreakStatement): unknown {
+        throw new BreakError()
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    visitContinueStatement(_statement: ContinueStatement): unknown {
+        this.skip = true
+        return null
+    }
+
+    visitWhileStatement(statement: WhileStatment): unknown {
+        try {
+            while (this.isTruthy(this.evaluate(statement.condition))) {
+                this.execute(statement.body)
+                this.skip = false
+            }
+        } catch (err: unknown) {
+            if (err instanceof BreakError) {
+                // console.log('break occured')
+            }
+        }
+
+        return null
+    }
+
     visitBlockStatement(statement: BlockStatement): unknown {
+        // console.log(BlockStatement)
         this.executeBlock(
             statement.declarations,
             new Environment(this.environment)
@@ -191,6 +250,8 @@ export default class Interpreter implements visitor<unknown> {
     }
 
     private execute(declaration: Declaration) {
+        if (this.skip) return null
+
         return declaration.accept(this)
     }
 

@@ -158,6 +158,8 @@ export default class Lexer {
         keywords.set('nil', TokenKind.NIL)
         keywords.set('or', TokenKind.OR)
         keywords.set('print', TokenKind.PRINT)
+        keywords.set('break', TokenKind.BREAK)
+        keywords.set('continue', TokenKind.CONTINUE)
         keywords.set('return', TokenKind.RETURN)
         keywords.set('super', TokenKind.SUPER)
         keywords.set('this', TokenKind.THIS)

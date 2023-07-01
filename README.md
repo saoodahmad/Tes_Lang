@@ -31,11 +31,13 @@ classDecl      → "class" IDENTIFIER ( "<" IDENTIFIER )? "{" function* "}" ;
 funDecl        → "fun" function ;
 varDecl        → "var" IDENTIFIER ( "=" expression )? ";" ;
 
-statement      → exprStmt | forStmt | ifStmt | printStmt | returnStmt | whileStmt | block ;
+statement      → exprStmt | forStmt | ifStmt | printStmt | breakStmt | continueStmt | returnStmt | whileStmt | block ;
 exprStmt       → expression ";" ;
 forStmt        → "for" "(" ( varDecl | exprStmt | ";" ) expression? ";" expression? ")" statement ;
 ifStmt         → "if" "(" expression ")" statement ( "else" statement )? ;
 printStmt      → "print" expression ";" ;
+breakStmt      → "break ;"
+continueStmt   → "continue ;"
 returnStmt     → "return" expression? ";" ;
 whileStmt      → "while" "(" expression ")" statement ;
 block          → "{" declaration* "}" ;

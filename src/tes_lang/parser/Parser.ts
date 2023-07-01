@@ -17,6 +17,10 @@ import AssignExpression from '../syntax/expression/AssignExpression'
 import BlockStatement from '../syntax/statement/BlockStatement'
 import IfStatement from '../syntax/statement/IfStatement'
 import LogicalExpression from '../syntax/expression/LogicalExpression'
+import WhileStatment from '../syntax/statement/WhileStatement'
+import BreakStatement from '../syntax/statement/BreakStatement'
+import ForStatment from '../syntax/statement/ForStatement'
+import ContinueStatement from '../syntax/statement/ContinueStatement'
 
 export default class Parser {
     tokens = new Array<Token>()
@@ -26,6 +30,8 @@ export default class Parser {
     constructor(tokens: Token[]) {
         this.tokens = tokens
     }
+
+    nestedLoopCount = 0
 
     parse(): Declaration[] {
         try {
@@ -42,26 +48,34 @@ export default class Parser {
 
     declaration(): Declaration {
         if (this.match([TokenKind.VAR])) {
-            const identifier = this.advance()
-
-            let initializer: Expression = null
-
-            if (this.match([TokenKind.EQUAL])) {
-                initializer = this.expression()
-            }
-
-            this.consume(
-                TokenKind.SEMICOLON,
-                "Expect ';' after variable declaration"
-            )
-
-            return new VariableDeclaration(identifier, initializer)
+            return this.variableDeclaration()
         }
 
         return this.statement()
     }
 
+    variableDeclaration(): VariableDeclaration {
+        const identifier = this.advance()
+
+        let initializer: Expression = null
+
+        if (this.match([TokenKind.EQUAL])) {
+            initializer = this.expression()
+        }
+
+        this.consume(
+            TokenKind.SEMICOLON,
+            "Expect ';' after variable declaration"
+        )
+
+        return new VariableDeclaration(identifier, initializer)
+    }
+
     statement(): Statement {
+        if (this.match([TokenKind.FOR])) {
+            return this.forStatement()
+        }
+
         if (this.match([TokenKind.IF])) {
             return this.ifStatment()
         }
@@ -69,11 +83,69 @@ export default class Parser {
         if (this.match([TokenKind.PRINT])) {
             return this.printStatement()
         }
+
+        if (this.match([TokenKind.BREAK])) {
+            return this.breakStatement()
+        }
+
+        if (this.match([TokenKind.CONTINUE])) {
+            return this.continueStatement()
+        }
+
+        if (this.match([TokenKind.WHILE])) {
+            return this.WhileStatment()
+        }
+
         if (this.match([TokenKind.LEFT_BRACE])) {
             return this.blockStatement()
         }
 
         return this.expressionStatment()
+    }
+
+    forStatement(): ForStatment {
+        this.consume(TokenKind.LEFT_PAREN, "Expect '(' after 'if'.")
+
+        let initializer = null
+
+        if (!this.match([TokenKind.SEMICOLON])) {
+            if (this.match([TokenKind.VAR])) {
+                initializer = this.variableDeclaration()
+            } else {
+                initializer = this.expressionStatment()
+            }
+        }
+
+        let condition = null
+
+        if (!this.check(TokenKind.SEMICOLON)) {
+            condition = this.expression()
+        } else {
+            condition = new LiteralExpression(true)
+        }
+
+        this.consume(TokenKind.SEMICOLON, "Expect ';'  after loop condition")
+
+        let increment = null
+
+        if (!this.check(TokenKind.RIGHT_PAREN)) {
+            increment = this.expression()
+        }
+
+        this.consume(
+            TokenKind.RIGHT_PAREN,
+            "Expect ')'  after increment condition"
+        )
+
+        try {
+            this.nestedLoopCount++
+
+            const body = this.statement()
+
+            return new ForStatment(initializer, condition, increment, body)
+        } finally {
+            this.nestedLoopCount--
+        }
     }
 
     ifStatment(): IfStatement {
@@ -102,12 +174,40 @@ export default class Parser {
         return new PrintStatement(value)
     }
 
-    expressionStatment(): ExpressionStatement {
-        const value: Expression = this.expression()
+    breakStatement(): BreakStatement {
+        if (this.nestedLoopCount === 0) {
+            throw this.error(this.previous(), "'break' can used within loop")
+        }
 
-        this.consume(TokenKind.SEMICOLON, "Expect ';' after value")
+        this.consume(TokenKind.SEMICOLON, "Expect ';' after break")
 
-        return new ExpressionStatement(value)
+        return new BreakStatement()
+    }
+
+    continueStatement(): ContinueStatement {
+        if (this.nestedLoopCount === 0) {
+            throw this.error(this.previous(), "'continue' can used within loop")
+        }
+
+        this.consume(TokenKind.SEMICOLON, "Expect ';' after break")
+
+        return new ContinueStatement()
+    }
+
+    WhileStatment(): WhileStatment {
+        this.consume(TokenKind.LEFT_PAREN, "Expect '(' after 'while'.")
+
+        const condition = this.expression()
+
+        this.consume(TokenKind.RIGHT_PAREN, "Expect ')' after condition .")
+
+        try {
+            this.nestedLoopCount++
+            const body = this.statement()
+            return new WhileStatment(condition, body)
+        } finally {
+            this.nestedLoopCount--
+        }
     }
 
     blockStatement(): BlockStatement {
@@ -120,6 +220,14 @@ export default class Parser {
         this.consume(TokenKind.RIGHT_BRACE, "Expect '}' after block.")
 
         return new BlockStatement(declarations)
+    }
+
+    expressionStatment(): ExpressionStatement {
+        const value: Expression = this.expression()
+
+        this.consume(TokenKind.SEMICOLON, "Expect ';' after value")
+
+        return new ExpressionStatement(value)
     }
 
     expression(): Expression {
@@ -210,19 +318,13 @@ export default class Parser {
     term(): Expression {
         let expr = this.factor()
 
-        // console.log('left', expr)
-
         while (this.match([TokenKind.PLUS, TokenKind.MINUS])) {
             const operator = this.previous()
 
             const right = this.factor()
 
-            // console.log(right, 'expr')
-
             expr = new BinaryExpression(expr, operator, right)
         }
-
-        // console.log(expr)
 
         return expr
     }
@@ -344,6 +446,8 @@ export default class Parser {
                 case TokenKind.WHILE:
                 case TokenKind.PRINT:
                 case TokenKind.RETURN:
+                case TokenKind.BREAK:
+                case TokenKind.CONTINUE:
                     return
             }
 

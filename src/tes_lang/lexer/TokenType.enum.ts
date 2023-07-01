@@ -43,6 +43,8 @@ export enum TokenKind {
     OR = 'OR',
 
     PRINT = 'PRINT',
+    BREAK = 'BREAK',
+    CONTINUE = 'CONTINUE',
     RETURN = 'RETURN',
     SUPER = 'SUPER',
     THIS = 'THIS',

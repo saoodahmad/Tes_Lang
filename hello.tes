@@ -1,5 +1,38 @@
-print "hi" or 2; // "hi".
-print nil and "yes";
+
+/* var x = 0;
+
+while(x <10) {
+    if(x > 5) break;
+
+    print x;
+    x = x + 1;
+}
+
+print ""; 
+
+print x;
+
+*/
+
+
+var x = 0;
+
+
+for(; ; ) {
+    if(x >= 5) break;
+
+    print x;
+    x = x + 1;
+
+}
+
+print "";
+
+print x;
+
+
+
+
 
 
 
