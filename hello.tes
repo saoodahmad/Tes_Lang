@@ -28,18 +28,16 @@ for (var i = 0; i < 20; i = i + 1) {
 */
 
 fun makeCounter() {
-  var i = 0;
-  fun count() {
-    i = i + 1;
-    print i;
-  }
+  for(var x = 0; x < 10; x = x + 1) {
+    if(x>5) break;
+    if(x == 2) continue;
 
-  return count;
+    print x;
+  }
 }
 
-var counter = makeCounter();
-counter(); // "1".
-counter(); // "2"
+makeCounter();
+
 
 
 

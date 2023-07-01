@@ -36,6 +36,8 @@ export default class Parser {
 
     nestedLoopCount = 0
 
+    nestedFunctionCount = 0
+
     parse(): Declaration[] {
         try {
             const declarations: Declaration[] = []
@@ -86,9 +88,15 @@ export default class Parser {
 
         this.consume(TokenKind.LEFT_BRACE, "Expect '{' before function body")
 
-        const body = this.blockStatement()
+        try {
+            this.nestedFunctionCount++
 
-        return new FunctionDeclaration(name, formalArguments, body)
+            const body = this.blockStatement()
+
+            return new FunctionDeclaration(name, formalArguments, body)
+        } finally {
+            this.nestedFunctionCount--
+        }
     }
 
     variableDeclaration(): VariableDeclaration {
@@ -227,7 +235,10 @@ export default class Parser {
 
     continueStatement(): ContinueStatement {
         if (this.nestedLoopCount === 0) {
-            throw this.error(this.previous(), "'continue' can used within loop")
+            throw this.error(
+                this.previous(),
+                "'continue' can e used only within loop"
+            )
         }
 
         this.consume(TokenKind.SEMICOLON, "Expect ';' after break")
@@ -236,6 +247,13 @@ export default class Parser {
     }
 
     returnStatement(): ReturnStatement {
+        if (this.nestedFunctionCount === 0) {
+            throw this.error(
+                this.previous(),
+                "'return' can be only used within function"
+            )
+        }
+
         const name = this.previous()
 
         let value: Expression = null

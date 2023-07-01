@@ -63,7 +63,7 @@ export default class Interpreter implements visitor<unknown> {
             return this.error(name, `${name.lexeme} is an inbuilt function`)
         }
 
-        const func = new Function(declaration, this.environment)
+        const func = new Function(declaration)
 
         this.environment.define(name.lexeme, func)
 

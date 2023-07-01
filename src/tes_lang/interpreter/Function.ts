@@ -7,10 +7,7 @@ import Return from './Return'
 export default class Function implements Callable {
     private readonly declaration: FunctionDeclaration
 
-    private readonly closure: Environment
-
-    constructor(declaration: FunctionDeclaration, closure: Environment) {
-        this.closure = closure
+    constructor(declaration: FunctionDeclaration) {
         this.declaration = declaration
     }
 
@@ -19,7 +16,7 @@ export default class Function implements Callable {
     }
 
     call(interpreter: Interpreter, callArguments: unknown[]): unknown {
-        const environment = new Environment(this.closure)
+        const environment = new Environment(interpreter.globals)
 
         this.declaration.formalArguments.forEach((formalArgument, idx) => {
             environment.define(formalArgument.lexeme, callArguments[idx])
@@ -34,6 +31,7 @@ export default class Function implements Callable {
             if (error instanceof Return) {
                 return error.returnValue
             }
+            console.log(error)
         }
 
         return null
