@@ -25,11 +25,25 @@ import BreakStatement from '../syntax/statement/BreakStatement'
 import BreakError from './BreakError'
 import ForStatment from '../syntax/statement/ForStatement'
 import ContinueStatement from '../syntax/statement/ContinueStatement'
+import CallExpression from '../syntax/expression/CallExpression'
+import Callable from './Callable'
+import { Millis, Minimum } from './GlobalFunction'
+import FunctionDeclaration from '../syntax/declaration/FunctionDeclaration'
+import Function from './Function'
+import ReturnStatement from '../syntax/statement/ReturnStatement'
+import Return from './Return'
 
 export default class Interpreter implements visitor<unknown> {
-    private environment: Environment = new Environment()
+    readonly globals = new Environment()
+
+    private environment: Environment = this.globals
 
     private skip = false
+
+    constructor() {
+        this.globals.define('getMillis', new Millis())
+        this.globals.define('getMin', new Minimum())
+    }
 
     interpret(declarations: Declaration[]) {
         try {
@@ -39,6 +53,21 @@ export default class Interpreter implements visitor<unknown> {
         } catch (error) {
             TesLang.reportInpterpreterError(error)
         }
+    }
+
+    visitFunctionDeclaration(declaration: FunctionDeclaration): unknown {
+        const { name } = declaration
+
+        if (this.globals.peek(name) !== false) {
+            console.log(`${name.lexeme} is already an inbuilt function`)
+            return this.error(name, `${name.lexeme} is an inbuilt function`)
+        }
+
+        const func = new Function(declaration, this.environment)
+
+        this.environment.define(name.lexeme, func)
+
+        return null
     }
 
     visitVariableDeclaration(declaration: VariableDeclaration): unknown {
@@ -110,6 +139,14 @@ export default class Interpreter implements visitor<unknown> {
         return null
     }
 
+    visitReturnStatement(statement: ReturnStatement): unknown {
+        let value = null
+
+        if (statement.value != null) value = this.evaluate(statement.value)
+
+        throw new Return(value)
+    }
+
     visitWhileStatement(statement: WhileStatment): unknown {
         try {
             while (this.isTruthy(this.evaluate(statement.condition))) {
@@ -132,6 +169,37 @@ export default class Interpreter implements visitor<unknown> {
             new Environment(this.environment)
         )
         return null
+    }
+
+    visitCallExpression(expression: CallExpression): unknown {
+        const callee = this.evaluate(expression.callee)
+
+        const callArguments: unknown[] = []
+
+        expression.callArguments.forEach((callArgument) => {
+            callArguments.push(this.evaluate(callArgument))
+        })
+
+        if (!this.isCallable(callee)) {
+            return this.error(expression.parenthesis, 'Can only call functions')
+        }
+
+        const func: Callable = callee
+
+        if (callArguments.length !== func.airty()) {
+            return this.error(
+                expression.parenthesis,
+                `Expected ${func.airty()} arguments but got ${
+                    callArguments.length
+                }.`
+            )
+        }
+
+        return func.call(this, callArguments)
+    }
+
+    isCallable(calle: Expression): boolean {
+        return 'call' in calle
     }
 
     visitAssignExpression(expression: AssignExpression): unknown {
@@ -255,10 +323,7 @@ export default class Interpreter implements visitor<unknown> {
         return declaration.accept(this)
     }
 
-    private executeBlock(
-        declarations: Declaration[],
-        environment: Environment
-    ) {
+    executeBlock(declarations: Declaration[], environment: Environment) {
         const previous = this.environment
 
         try {

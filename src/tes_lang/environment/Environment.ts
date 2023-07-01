@@ -42,4 +42,11 @@ export default class Environment {
     define(key: string, value: unknown) {
         this.values.set(key, value)
     }
+
+    peek(name: Token) {
+        if (this.values.has(name.lexeme)) {
+            return this.values.get(name.lexeme)
+        }
+        return false
+    }
 }

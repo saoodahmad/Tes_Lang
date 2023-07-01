@@ -56,7 +56,7 @@ call           → primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 primary        → "true" | "false" | "nil" | "this" | NUMBER | STRING | IDENTIFIER | "(" expression ")"
                | "super" "." IDENTIFIER ;
 
-function       → IDENTIFIER "(" parameters? ")" block ;
+function       → IDENTIFIER "(" parameters? ")" statement ;
 parameters     → IDENTIFIER ( "," IDENTIFIER )* ;
 arguments      → expression ( "," expression )* ;
 ```

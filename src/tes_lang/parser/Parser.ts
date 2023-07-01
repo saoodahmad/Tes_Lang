@@ -21,6 +21,9 @@ import WhileStatment from '../syntax/statement/WhileStatement'
 import BreakStatement from '../syntax/statement/BreakStatement'
 import ForStatment from '../syntax/statement/ForStatement'
 import ContinueStatement from '../syntax/statement/ContinueStatement'
+import CallExpression from '../syntax/expression/CallExpression'
+import FunctionDeclaration from '../syntax/declaration/FunctionDeclaration'
+import ReturnStatement from '../syntax/statement/ReturnStatement'
 
 export default class Parser {
     tokens = new Array<Token>()
@@ -47,11 +50,45 @@ export default class Parser {
     }
 
     declaration(): Declaration {
+        if (this.match([TokenKind.FUN])) {
+            return this.functionDeclaration()
+        }
+
         if (this.match([TokenKind.VAR])) {
             return this.variableDeclaration()
         }
 
         return this.statement()
+    }
+
+    functionDeclaration(): FunctionDeclaration {
+        const name = this.consume(
+            TokenKind.IDENTIFIER,
+            "Expect function name  after 'fun'."
+        )
+
+        this.consume(TokenKind.LEFT_PAREN, "Expect '(' after function name.")
+
+        const formalArguments: Token[] = []
+
+        if (!this.check(TokenKind.RIGHT_PAREN)) {
+            do {
+                formalArguments.push(
+                    this.consume(
+                        TokenKind.IDENTIFIER,
+                        'Expected identifer (argument name).'
+                    )
+                )
+            } while (this.match([TokenKind.COMMA]))
+        }
+
+        this.consume(TokenKind.RIGHT_PAREN, "Expect ')' after alst argument.")
+
+        this.consume(TokenKind.LEFT_BRACE, "Expect '{' before function body")
+
+        const body = this.blockStatement()
+
+        return new FunctionDeclaration(name, formalArguments, body)
     }
 
     variableDeclaration(): VariableDeclaration {
@@ -90,6 +127,10 @@ export default class Parser {
 
         if (this.match([TokenKind.CONTINUE])) {
             return this.continueStatement()
+        }
+
+        if (this.match([TokenKind.RETURN])) {
+            return this.returnStatement()
         }
 
         if (this.match([TokenKind.WHILE])) {
@@ -192,6 +233,20 @@ export default class Parser {
         this.consume(TokenKind.SEMICOLON, "Expect ';' after break")
 
         return new ContinueStatement()
+    }
+
+    returnStatement(): ReturnStatement {
+        const name = this.previous()
+
+        let value: Expression = null
+
+        if (!this.check(TokenKind.SEMICOLON)) {
+            value = this.expression()
+        }
+
+        this.consume(TokenKind.SEMICOLON, "Expect ';'  after retur value.")
+
+        return new ReturnStatement(name, value)
     }
 
     WhileStatment(): WhileStatment {
@@ -351,7 +406,44 @@ export default class Parser {
             return new UnaryExpression(operator, expr)
         }
 
-        return this.primary()
+        return this.call()
+    }
+
+    call(): Expression {
+        let expr = this.primary()
+
+        // supports hello()()
+        // eslint-disable-next-line no-constant-condition
+        while (true) {
+            if (this.match([TokenKind.LEFT_PAREN])) {
+                expr = this.finishCall(expr)
+            } else {
+                break
+            }
+        }
+
+        return expr
+    }
+
+    finishCall(callee: Expression): CallExpression {
+        const callArguments: Expression[] = []
+
+        if (!this.check(TokenKind.RIGHT_PAREN)) {
+            do {
+                callArguments.push(this.expression())
+            } while (this.match([TokenKind.COMMA]))
+        }
+
+        const closingParan = this.consume(
+            TokenKind.RIGHT_PAREN,
+            "Expect ')' after arguments"
+        )
+
+        if (callArguments.length > 5) {
+            this.error(this.peek(), 'Too many arguments, max allowed is 5')
+        }
+
+        return new CallExpression(callee, closingParan, callArguments)
     }
 
     primary(): Expression {

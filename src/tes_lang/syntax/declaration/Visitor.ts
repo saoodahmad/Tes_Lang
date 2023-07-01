@@ -15,18 +15,23 @@ import PrintStatement from '../statement/PrintStatement'
 import WhileStatment from '../statement/WhileStatement'
 import ForStatment from '../statement/ForStatement'
 import ContinueStatement from '../statement/ContinueStatement'
+import CallExpression from '../expression/CallExpression'
+import FunctionDeclaration from './FunctionDeclaration'
+import ReturnStatement from '../statement/ReturnStatement'
 
 export default interface Visitor<T> {
+    visitFunctionDeclaration(declaration: FunctionDeclaration): T
     visitVariableDeclaration(declaration: VariableDeclaration): T
 
     visitExpressionStatment(statement: ExpressionStatement): T
     visitForStatement(statement: ForStatment): T
     visitIfStatement(statement: IfStatement): T
     visitPrintStatement(statement: PrintStatement): T
-    visitWhileStatement(statement: WhileStatment): T
-    visitBlockStatement(statement: BlockStatement): T
     visitBreakStatement(statement: BreakStatement): T
     visitContinueStatement(statement: ContinueStatement): T
+    visitReturnStatement(statement: ReturnStatement): T
+    visitWhileStatement(statement: WhileStatment): T
+    visitBlockStatement(statement: BlockStatement): T
 
     visitBinaryExpression(expression: BinaryExpression): T
     visitUnaryExpression(expression: UnaryExpression): T
@@ -35,4 +40,5 @@ export default interface Visitor<T> {
     visitVariableExpression(expression: VariableExpression): T
     visitAssignExpression(expression: AssignExpression): T
     visitLogicalExpression(expression: LogicalExpression): T
+    visitCallExpression(expression: CallExpression): T
 }
