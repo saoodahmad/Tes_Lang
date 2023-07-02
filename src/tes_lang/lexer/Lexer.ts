@@ -52,9 +52,6 @@ export default class Lexer {
             case ',':
                 this.addToken(TokenKind.COMMA)
                 break
-            case '.':
-                this.addToken(TokenKind.DOT)
-                break
             case '-':
                 this.addToken(TokenKind.MINUS)
                 break
@@ -67,7 +64,9 @@ export default class Lexer {
             case '*':
                 this.addToken(TokenKind.STAR)
                 break
-            // multi charcter token
+            case '%':
+                this.addToken(TokenKind.MODULO)
+                break
             case '!':
                 if (!this.isAtEnd()) {
                     this.addToken(
@@ -149,23 +148,25 @@ export default class Lexer {
         const keywords = new Map<string, TokenKind>()
 
         keywords.set('and', TokenKind.AND)
-        keywords.set('class', TokenKind.CLASS)
-        keywords.set('else', TokenKind.ELSE)
-        keywords.set('false', TokenKind.FALSE)
-        keywords.set('for', TokenKind.FOR)
-        keywords.set('fun', TokenKind.FUN)
-        keywords.set('if', TokenKind.IF)
-        keywords.set('nil', TokenKind.NIL)
         keywords.set('or', TokenKind.OR)
-        keywords.set('print', TokenKind.PRINT)
-        keywords.set('break', TokenKind.BREAK)
-        keywords.set('continue', TokenKind.CONTINUE)
-        keywords.set('return', TokenKind.RETURN)
-        keywords.set('super', TokenKind.SUPER)
-        keywords.set('this', TokenKind.THIS)
+
         keywords.set('true', TokenKind.TRUE)
-        keywords.set('var', TokenKind.VAR)
+        keywords.set('false', TokenKind.FALSE)
+        keywords.set('nil', TokenKind.NIL)
+
+        keywords.set('if', TokenKind.IF)
+        keywords.set('else', TokenKind.ELSE)
+        keywords.set('continue', TokenKind.CONTINUE)
+        keywords.set('break', TokenKind.BREAK)
+        keywords.set('return', TokenKind.RETURN)
+
+        keywords.set('for', TokenKind.FOR)
         keywords.set('while', TokenKind.WHILE)
+
+        keywords.set('var', TokenKind.VAR)
+        keywords.set('fun', TokenKind.FUN)
+        keywords.set('print', TokenKind.PRINT)
+        keywords.set('println', TokenKind.PRINTLN)
 
         return keywords
     }

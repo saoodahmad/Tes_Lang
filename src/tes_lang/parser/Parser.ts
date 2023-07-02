@@ -548,7 +548,6 @@ export default class Parser {
 
             // eslint-disable-next-line default-case
             switch (this.peek().type) {
-                case TokenKind.CLASS:
                 case TokenKind.FUN:
                 case TokenKind.VAR:
                 case TokenKind.FOR:

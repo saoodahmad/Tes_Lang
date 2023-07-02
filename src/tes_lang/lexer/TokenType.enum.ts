@@ -1,56 +1,59 @@
 export enum TokenKind {
-    // Single character tokens
+    // Grouping and scope
     LEFT_PAREN = 'LEFT_PAREN',
     RIGHT_PAREN = 'RIGHT_PAREN',
     LEFT_BRACE = 'LEFT_BRACE',
     RIGHT_BRACE = 'RIGHT_BRACE',
 
+    // Delimeters
     COMMA = 'COMMA',
-    DOT = 'DOT',
+    SEMICOLON = 'SEMICOLON',
+
+    // Arithmetic Operators
     MINUS = 'MINUS',
     PLUS = 'PLUS',
-    SEMICOLON = 'SEMICOLON',
     SLASH = 'SLASH',
     STAR = 'STAR',
+    MODULO = 'MODULO',
 
-    // One or more character tokens
+    // Relational Operators
     BANG = 'BANG',
     BANG_EQUAL = 'BANG_EQUAL',
-
     EQUAL = 'EQUAL',
     EQUAL_EQUAL = 'EQUAL_EQUAL',
-
     GREATER = 'GREATER',
     GREATER_EQUAL = 'GREATER_EQUAL',
-
     LESS = 'LESS',
     LESS_EQUAL = 'LESS_EQUAL',
+
+    // Logical operators
+    AND = 'AND',
+    OR = 'OR',
 
     // Literals
     IDENTIFIER = 'IDENTIFIER',
     STRING = 'STRING',
     NUMBER = 'NUMBER',
-
-    // Keywords
-    AND = 'AND',
-    CLASS = 'CLASS',
-    ELSE = 'ELSE',
-    FALSE = 'FALSE',
-    FUN = 'FUN',
-    FOR = 'FOR',
-    IF = 'IF',
-    NIL = 'NIL',
-    OR = 'OR',
-
-    PRINT = 'PRINT',
-    BREAK = 'BREAK',
-    CONTINUE = 'CONTINUE',
-    RETURN = 'RETURN',
-    SUPER = 'SUPER',
-    THIS = 'THIS',
     TRUE = 'TRUE',
-    VAR = 'VAR',
+    FALSE = 'FALSE',
+    NIL = 'NIL',
+
+    // Control flow
+    IF = 'IF',
+    ELSE = 'ELSE',
+    CONTINUE = 'CONTINUE',
+    BREAK = 'BREAK',
+    RETURN = 'RETURN',
+
+    // Loop
+    FOR = 'FOR',
     WHILE = 'WHILE',
+
+    // others
+    VAR = 'VAR',
+    FUN = 'FUN',
+    PRINT = 'PRINT',
+    PRINTLN = 'PRINTLN',
 
     // Special token
     EOF = 'EOF',
